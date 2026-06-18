@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+.env
+app/uploads/
+app/static/uploads/
+*.csv
+Chat.zip
+.git/
+.gitignore
+.dockerignore
