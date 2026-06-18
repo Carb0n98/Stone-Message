@@ -1,0 +1,13 @@
+Flask
+Flask-SocketIO
+Flask-SQLAlchemy
+bcrypt
+python-socketio
+python-engineio
+pymysql
+pywebpush
+cryptography
+Pillow
+Flask-Limiter
+bleach
+APScheduler

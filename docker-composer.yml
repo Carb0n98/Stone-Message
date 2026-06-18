@@ -1,0 +1,28 @@
+services:
+  flask:
+    container_name: chatflask
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    ports:
+      - "8083:8083"
+    volumes:
+      - chat_uploads:/app/uploads
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-sua_chave_secreta_producao}
+      - DATABASE_URI=${DATABASE_URI:-mysql+pymysql://Nate:Natecrusader25@147.93.67.17:3306/default}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-BKGeyfjwHzKcgPEM0I-XqudWHWiSVuOIFcBs5dLv5hOy9BhAaFbznVbsHqqi8zXzHcHefAMa0qpIuDVI4vAMKvI}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0hBZ0VBTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEJHMHdhd0lCQVFRZ3hvbWtQWGk4cXJrYVZHMSsKQWhMSUNVMnlBV1NmdHVQMVl1a1NVVXlHL1BDaFJBTkNBQVNobnNuNDhCOHluSUR4RE5DUGw2cm5WaDFva2xiagppQlhBYk9YUzcrWVRzdlFZUUdoVzg1MVc3QjZxb3ZNMTh4M0IzbndER3RLcVNMZzFTT0x3RENyeQotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tCg}
+      - VAPID_EMAIL=${VAPID_EMAIL:-mailto:jbplsyer406@gmail.com}
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+volumes:
+  chat_uploads:

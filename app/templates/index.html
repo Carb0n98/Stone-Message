@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stone Messages</title>
+    <meta name="description" content="Stone Messages — Plataforma de comunicação em tempo real">
+    <link rel="icon" href="/static/icons/icon-192x192.png">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#FFB3CD">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    <!-- Theme Decoration (Hello Kitty) -->
+    <div class="theme-decoration"></div>
+    <div class="theme-decoration-top"></div>
+
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="Preview">
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <button class="context-menu-item" onclick="handleContextAction('reply')">↩️ Responder</button>
+        <button class="context-menu-item" onclick="handleContextAction('react')">😀 Reagir</button>
+        <button class="context-menu-item" onclick="handleContextAction('pin')">📌 Fixar</button>
+        <div class="context-menu-divider" id="ctxEditDivider"></div>
+        <button class="context-menu-item" id="ctxEditBtn" onclick="handleContextAction('edit')">✏️ Editar</button>
+        <button class="context-menu-item danger" id="ctxDeleteBtn" onclick="handleContextAction('delete')">🗑️ Excluir</button>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div class="modal-overlay" id="createRoomModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Nova Sala</h3>
+                <button class="modal-close" onclick="closeModal('createRoomModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Nome da Sala</label>
+                    <input class="form-input" id="newRoomName" type="text" placeholder="Ex: Projeto Alpha" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descrição (opcional)</label>
+                    <input class="form-input" id="newRoomDesc" type="text" placeholder="Sobre o que é essa sala?" maxlength="500">
+                </div>
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="newRoomPrivate">
+                        <span>Sala privada (apenas membros convidados)</span>
+                    </label>
+                </div>
+                <div class="form-group" id="memberSelectGroup" style="display:none">
+                    <label class="form-label">Adicionar Membros</label>
+                    <div class="user-select-list" id="memberSelectList"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('createRoomModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="createRoom()">Criar Sala</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ Configurações</h3>
+                <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Tema</label>
+                    <div class="theme-grid" id="themeGrid">
+                        <div class="theme-option" data-theme="default" onclick="setTheme('default')">
+                            <div class="theme-preview theme-preview-default">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="theme-option-name">🌸 Rosa Clássico</span>
+                        </div>
+                        <div class="theme-option" data-theme="hello-kitty" onclick="setTheme('hello-kitty')">
+                            <div class="theme-preview theme-preview-hello-kitty">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="theme-option-name">🎀 Hello Kitty</span>
+                        </div>
+                        <div class="theme-option" data-theme="midnight" onclick="setTheme('midnight')">
+                            <div class="theme-preview theme-preview-midnight">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="theme-option-name">🌙 Midnight</span>
+                        </div>
+                        <div class="theme-option" data-theme="ocean" onclick="setTheme('ocean')">
+                            <div class="theme-preview theme-preview-ocean">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="theme-option-name">🌊 Ocean</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mt-4" id="userStorageContainer">
+                    <label class="form-label">📊 Armazenamento Usado</label>
+                    <div class="storage-bar-wrapper" style="background:var(--bg-input);border-radius:8px;height:12px;width:100%;overflow:hidden;margin-bottom:6px;position:relative;">
+                        <div id="userStorageProgress" style="background:var(--primary);height:100%;width:0%;transition:width 0.3s ease;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-secondary);">
+                        <span id="userStorageText">0.0 MB / 500.0 MB</span>
+                        <span id="userStoragePercent">0%</span>
+                    </div>
+                </div>
+                <div class="form-group mt-4">
+                    <label class="form-label">Conta</label>
+                    <a href="{{ url_for('change_password') }}" class="btn btn-secondary w-full" style="text-decoration:none;justify-content:center;">🔒 Alterar Senha</a>
+                </div>
+                {% if is_admin %}
+                <div class="form-group mt-2">
+                    <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary w-full" style="text-decoration:none;justify-content:center;">🛡️ Painel Admin</a>
+                </div>
+                {% endif %}
+                <div class="form-group mt-2">
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger w-full" style="text-decoration:none;justify-content:center;">🚪 Sair</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Info Modal -->
+    <div class="modal-overlay" id="roomInfoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="roomInfoTitle">Info da Sala</h3>
+                <button class="modal-close" onclick="closeModal('roomInfoModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="roomInfoContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emoji Quick Picker (for reactions) -->
+    <div class="modal-overlay" id="reactionPickerModal">
+        <div class="modal" style="max-width: 360px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Reagir com emoji</h3>
+                <button class="modal-close" onclick="closeModal('reactionPickerModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="emoji-grid" id="reactionGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN LAYOUT ===== -->
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">💬</div>
+                    <h1>Stone Messages</h1>
+                </div>
+                <div class="sidebar-actions">
+                    <button class="sidebar-btn" id="newRoomBtn" title="Nova sala" onclick="openModal('createRoomModal')">+</button>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input class="search-input" id="globalSearch" type="text" placeholder="Buscar conversas..." autocomplete="off">
+            </div>
+
+            <div class="room-filters">
+                <button class="filter-btn active" data-filter="all" onclick="filterRooms('all')">Todas</button>
+                <button class="filter-btn" data-filter="favorites" onclick="filterRooms('favorites')">⭐ Favoritas</button>
+                <button class="filter-btn" data-filter="private" onclick="filterRooms('private')">🔒 Privadas</button>
+                <button class="filter-btn" data-filter="archived" onclick="filterRooms('archived')">📁 Arquivo</button>
+            </div>
+
+            <div class="room-list" id="roomList">
+                <!-- Rooms loaded dynamically -->
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-avatar" id="userAvatar" style="background: #d67f9d;">
+                    {{ username[0]|upper }}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ username }}</div>
+                    <div class="user-status-text">● Online</div>
+                </div>
+                <button class="settings-btn" onclick="openModal('settingsModal')" title="Configurações">⚙️</button>
+            </div>
+        </aside>
+
+        <!-- CHAT AREA -->
+        <main class="chat-area" id="chatArea">
+            <!-- Empty state (shown when no room selected) -->
+            <div class="chat-empty" id="chatEmpty">
+                <div class="chat-empty-icon">💬</div>
+                <h2>Stone Messages</h2>
+                <p>Selecione uma conversa ou crie uma nova sala para começar a conversar.</p>
+            </div>
+
+            <!-- Active chat (hidden initially) -->
+            <div id="activeChat" class="hidden" style="flex:1;display:flex;flex-direction:column;height:100%;">
+                <!-- Chat Header -->
+                <div class="chat-header" id="chatHeader">
+                    <div class="chat-header-info">
+                        <button class="chat-header-back" id="backToSidebar" onclick="showSidebar()">←</button>
+                        <div class="chat-header-avatar" id="chatHeaderAvatar" style="background: var(--primary-dark);">G</div>
+                        <div class="chat-header-details">
+                            <div class="chat-header-name" id="chatHeaderName">Geral</div>
+                            <div class="chat-header-status" id="chatHeaderStatus">— membros</div>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button class="header-action-btn" onclick="togglePinnedPanel()" title="Fixadas">📌</button>
+                        <button class="header-action-btn" onclick="toggleRoomSearch()" title="Buscar">🔍</button>
+                        <button class="header-action-btn" onclick="showRoomInfo()" title="Info">ℹ️</button>
+                        <button class="header-action-btn" id="roomMenuBtn" onclick="toggleRoomMenu()" title="Mais">⋮</button>
+                    </div>
+                </div>
+
+                <!-- Room menu dropdown -->
+                <div class="context-menu" id="roomMenu" style="position:absolute;top:68px;right:20px;z-index:300;">
+                    <button class="context-menu-item" onclick="toggleFavorite()">
+                        <span id="favBtnText">⭐ Favoritar</span>
+                    </button>
+                    <button class="context-menu-item" onclick="toggleMute()">
+                        <span id="muteBtnText">🔇 Silenciar</span>
+                    </button>
+                    <button class="context-menu-item" onclick="toggleArchive()">
+                        <span id="archiveBtnText">📁 Arquivar</span>
+                    </button>
+                </div>
+
+                <!-- Pinned messages panel -->
+                <div class="pinned-panel" id="pinnedPanel">
+                    <div id="pinnedList"></div>
+                </div>
+
+                <!-- Messages -->
+                <div class="chat-messages" id="messages"></div>
+
+                <!-- Typing indicator -->
+                <div class="typing-indicator" id="typingIndicator"></div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <!-- Upload progress -->
+                    <div class="upload-progress" id="uploadProgress">
+                        <div class="upload-progress-bar">
+                            <div class="upload-progress-fill" id="uploadProgressFill"></div>
+                        </div>
+                        <div class="upload-progress-text" id="uploadProgressText">Enviando...</div>
+                    </div>
+
+                    <!-- Reply preview -->
+                    <div class="reply-preview" id="replyPreview">
+                        <div class="reply-preview-content">
+                            <div class="reply-preview-author" id="replyPreviewAuthor"></div>
+                            <div class="reply-preview-text" id="replyPreviewText"></div>
+                        </div>
+                        <button class="reply-preview-close" onclick="cancelReply()">✕</button>
+                    </div>
+
+                    <!-- Edit preview -->
+                    <div class="edit-preview" id="editPreview">
+                        <div class="reply-preview-content">
+                            <div class="reply-preview-author" style="color:var(--warning);">✏️ Editando mensagem</div>
+                            <div class="reply-preview-text" id="editPreviewText"></div>
+                        </div>
+                        <button class="reply-preview-close" onclick="cancelEdit()">✕</button>
+                    </div>
+
+                    <div class="chat-input-row">
+                        <div class="input-actions-left">
+                            <button class="attach-btn" id="attachBtn" onclick="document.getElementById('fileInput').click()" title="Anexar arquivo">📎</button>
+                            <button class="emoji-btn" id="emojiBtn" onclick="toggleEmojiPicker()" title="Emojis">😊</button>
+                        </div>
+                        <textarea class="message-input" id="messageInput" placeholder="Digite sua mensagem..." rows="1"></textarea>
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Enviar">➤</button>
+                    </div>
+                </div>
+
+                <!-- Emoji Picker -->
+                <div class="emoji-picker-container" id="emojiPicker">
+                    <div class="emoji-grid" id="emojiGrid"></div>
+                </div>
+            </div>
+
+            <!-- Search results panel (overlays chat) -->
+            <div class="search-results-panel" id="searchResultsPanel">
+                <div class="search-results-header">
+                    <button class="sidebar-btn" onclick="closeSearchResults()">←</button>
+                    <input class="search-input" id="roomSearchInput" type="text" placeholder="Buscar nesta conversa..." style="flex:1" autocomplete="off">
+                </div>
+                <div class="search-results-list" id="searchResultsList"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" class="file-input-hidden" id="fileInput" onchange="handleFileSelect(event)">
+
+    <!-- App Data -->
+    <script>
+        const APP_DATA = {
+            username: "{{ username }}",
+            userId: {{ user_id }},
+            isAdmin: {{ 'true' if is_admin else 'false' }},
+            theme: "{{ theme }}"
+        };
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/js/service-worker.js')
+            .then(function(registration) {
+                console.log('Service Worker registrado:', registration);
+            })
+            .catch(function(error) {
+                console.log('SW error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

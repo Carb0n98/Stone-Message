@@ -1,0 +1,25 @@
+{
+    "name": "Stone Messages",
+    "short_name": "Stone",
+    "description": "Plataforma de comunicação em tempo real",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFB3CD",
+    "theme_color": "#FFB3CD",
+    "orientation": "portrait-primary",
+    "categories": ["social", "communication"],
+    "icons": [
+        {
+            "src": "/static/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

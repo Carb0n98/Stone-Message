@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuário — Stone Messages</title>
+    <link rel="icon" href="/static/icons/icon-192x192.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+    <div class="auth-card">
+        <div class="auth-logo">✏️</div>
+        <h1 class="auth-title">Editar Usuário</h1>
+        <p class="auth-subtitle">Gerenciar dados de {{ user.username }}</p>
+
+        <form class="auth-form" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="auth-input-group">
+                <span class="auth-input-icon">👤</span>
+                <input class="auth-input" type="text" name="username" value="{{ user.username }}" required>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+                <label class="form-checkbox" style="cursor:pointer;">
+                    <input type="checkbox" name="is_admin" {% if user.is_admin %}checked{% endif %}>
+                    <span style="color:var(--text-primary);font-size:0.9rem;">Administrador</span>
+                </label>
+            </div>
+            <button class="auth-btn" type="submit">Salvar Alterações</button>
+        </form>
+
+        <p class="auth-link">
+            <a href="{{ url_for('admin_panel') }}">← Voltar ao Painel Admin</a>
+        </p>
+    </div>
+
+    <div class="theme-decoration"></div>
+</body>
+</html>

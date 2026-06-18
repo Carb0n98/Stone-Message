@@ -1,0 +1,144 @@
+/* ===================================================================
+   STONE MESSAGES — Design System & Theme Engine
+   =================================================================== */
+
+/* --- Theme Variables --- */
+[data-theme="default"], :root {
+    --primary: #FFB3CD;
+    --primary-dark: #d67f9d;
+    --primary-light: #ffd6e7;
+    --primary-hover: #ff9bbf;
+    --accent: #ff7eb3;
+    --bg-main: linear-gradient(135deg, #FFB3CD 0%, #ffd6e7 50%, #FFB3CD 100%);
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #fff5f9;
+    --bg-sidebar: rgba(255, 255, 255, 0.85);
+    --bg-input: rgba(214, 127, 157, 0.15);
+    --bg-chat: rgba(255, 255, 255, 0.3);
+    --bg-message-user: linear-gradient(135deg, #d67f9d, #e091ad);
+    --bg-message-other: rgba(255, 255, 255, 0.85);
+    --bg-header: rgba(255, 179, 205, 0.9);
+    --bg-modal: rgba(255, 179, 205, 0.15);
+    --text-primary: #2d2d3f;
+    --text-secondary: #6b6b80;
+    --text-message-user: #ffffff;
+    --text-message-other: #2d2d3f;
+    --text-on-primary: #ffffff;
+    --border: rgba(214, 127, 157, 0.25);
+    --border-strong: rgba(214, 127, 157, 0.5);
+    --shadow: 0 4px 24px rgba(214, 127, 157, 0.15);
+    --shadow-lg: 0 8px 40px rgba(214, 127, 157, 0.25);
+    --glass: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --online-color: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+    --unread-badge: #ef4444;
+    --scrollbar-thumb: rgba(214, 127, 157, 0.4);
+    --scrollbar-track: transparent;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --theme-decoration: none;
+    --theme-decoration-opacity: 0;
+}
+
+[data-theme="hello-kitty"] {
+    --primary: #FF69B4;
+    --primary-dark: #e55a9f;
+    --primary-light: #FFB6D9;
+    --primary-hover: #ff85c8;
+    --accent: #FF1493;
+    --bg-main: linear-gradient(135deg, #FFF0F5 0%, #FFE4F0 50%, #FFF0F5 100%);
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #fff5fa;
+    --bg-sidebar: rgba(255, 240, 245, 0.92);
+    --bg-input: rgba(255, 105, 180, 0.1);
+    --bg-chat: rgba(255, 246, 250, 0.5);
+    --bg-message-user: linear-gradient(135deg, #FF69B4, #FF85C8);
+    --bg-message-other: rgba(255, 255, 255, 0.9);
+    --bg-header: rgba(255, 105, 180, 0.85);
+    --bg-modal: rgba(255, 105, 180, 0.1);
+    --text-primary: #4a2040;
+    --text-secondary: #8b6080;
+    --text-message-user: #ffffff;
+    --text-message-other: #4a2040;
+    --text-on-primary: #ffffff;
+    --border: rgba(255, 105, 180, 0.2);
+    --border-strong: rgba(255, 105, 180, 0.4);
+    --shadow: 0 4px 24px rgba(255, 105, 180, 0.15);
+    --shadow-lg: 0 8px 40px rgba(255, 105, 180, 0.2);
+    --glass: rgba(255, 240, 245, 0.7);
+    --glass-border: rgba(255, 182, 217, 0.4);
+    --scrollbar-thumb: rgba(255, 105, 180, 0.35);
+    --theme-decoration: url('/image/hello_kitty.png');
+    --theme-decoration-opacity: 1;
+}
+
+[data-theme="midnight"] {
+    --primary: #818cf8;
+    --primary-dark: #6366f1;
+    --primary-light: #a5b4fc;
+    --primary-hover: #a5b4fc;
+    --accent: #c084fc;
+    --bg-main: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    --bg-surface: #1e293b;
+    --bg-surface-hover: #273548;
+    --bg-sidebar: rgba(15, 23, 42, 0.95);
+    --bg-input: rgba(129, 140, 248, 0.12);
+    --bg-chat: rgba(30, 41, 59, 0.5);
+    --bg-message-user: linear-gradient(135deg, #6366f1, #818cf8);
+    --bg-message-other: rgba(30, 41, 59, 0.9);
+    --bg-header: rgba(15, 23, 42, 0.95);
+    --bg-modal: rgba(99, 102, 241, 0.08);
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-message-user: #ffffff;
+    --text-message-other: #e2e8f0;
+    --text-on-primary: #ffffff;
+    --border: rgba(129, 140, 248, 0.15);
+    --border-strong: rgba(129, 140, 248, 0.3);
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+    --glass: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(129, 140, 248, 0.2);
+    --scrollbar-thumb: rgba(129, 140, 248, 0.3);
+    --theme-decoration: none;
+    --theme-decoration-opacity: 0;
+}
+
+[data-theme="ocean"] {
+    --primary: #22d3ee;
+    --primary-dark: #06b6d4;
+    --primary-light: #67e8f9;
+    --primary-hover: #67e8f9;
+    --accent: #2dd4bf;
+    --bg-main: linear-gradient(135deg, #0c4a6e 0%, #164e63 50%, #0c4a6e 100%);
+    --bg-surface: #1a3a4a;
+    --bg-surface-hover: #1e4a5e;
+    --bg-sidebar: rgba(12, 74, 110, 0.95);
+    --bg-input: rgba(34, 211, 238, 0.1);
+    --bg-chat: rgba(26, 58, 74, 0.5);
+    --bg-message-user: linear-gradient(135deg, #06b6d4, #22d3ee);
+    --bg-message-other: rgba(26, 58, 74, 0.9);
+    --bg-header: rgba(12, 74, 110, 0.95);
+    --bg-modal: rgba(6, 182, 212, 0.08);
+    --text-primary: #e0f7fa;
+    --text-secondary: #80cbc4;
+    --text-message-user: #ffffff;
+    --text-message-other: #e0f7fa;
+    --text-on-primary: #0c4a6e;
+    --border: rgba(34, 211, 238, 0.15);
+    --border-strong: rgba(34, 211, 238, 0.3);
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+    --glass: rgba(26, 58, 74, 0.7);
+    --glass-border: rgba(34, 211, 238, 0.2);
+    --scrollbar-thumb: rgba(34, 211, 238, 0.3);
+    --theme-decoration: none;
+    --theme-decoration-opacity: 0;
+}

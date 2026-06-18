@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin — Stone Messages</title>
+    <meta name="description" content="Painel administrativo do Stone Messages">
+    <link rel="icon" href="/static/icons/icon-192x192.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-page">
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <h1 class="admin-title">🛡️ Painel Admin</h1>
+            <a href="{{ url_for('index') }}" class="admin-back-btn">← Voltar ao Chat</a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users">👥</div>
+                <div>
+                    <div class="stat-value">{{ users|length }}</div>
+                    <div class="stat-label">Usuários</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon online">🟢</div>
+                <div>
+                    <div class="stat-value" id="onlineCount">{{ online_count }}</div>
+                    <div class="stat-label">Online</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon rooms">💬</div>
+                <div>
+                    <div class="stat-value">{{ rooms|length }}</div>
+                    <div class="stat-label">Salas</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon messages">📨</div>
+                <div>
+                    <div class="stat-value">{{ total_messages }}</div>
+                    <div class="stat-label">Mensagens</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Codes -->
+        <div class="admin-section">
+            <h2 class="admin-section-title">🎟️ Códigos de Registro</h2>
+            <form action="{{ url_for('generate_code') }}" method="POST" style="margin-bottom:16px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-primary admin-generate-btn">+ Gerar Código</button>
+            </form>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for code in registration_codes %}
+                    <tr>
+                        <td><code style="background:var(--bg-input);padding:4px 10px;border-radius:6px;font-weight:600;letter-spacing:1px;">{{ code }}</code></td>
+                        <td>
+                            <form action="{{ url_for('delete_code', code=code) }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="admin-action-link danger" style="background:none;border:none;cursor:pointer;font-family:inherit;" onclick="return confirm('Excluir este código?')">🗑️ Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not registration_codes %}
+                    <tr>
+                        <td colspan="2" style="text-align:center;color:var(--text-secondary);padding:20px;">Nenhum código disponível</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Users -->
+        <div class="admin-section">
+            <h2 class="admin-section-title">👥 Usuários Registrados</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Admin</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="width:28px;height:28px;border-radius:8px;background:{{ user.avatar_color or '#d67f9d' }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:0.75rem;">
+                                    {{ user.username[0]|upper }}
+                                </div>
+                                {{ user.username }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="admin-badge {{ 'yes' if user.is_admin else 'no' }}">
+                                {{ 'Admin' if user.is_admin else 'Membro' }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('edit_user', user_id=user.id) }}" class="admin-action-link">✏️ Editar</a>
+                            <a href="{{ url_for('delete_user', user_id=user.id) }}" class="admin-action-link danger" onclick="return confirm('Tem certeza que deseja excluir este usuário?')">🗑️ Excluir</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Rooms -->
+        <div class="admin-section">
+            <h2 class="admin-section-title">💬 Salas de Chat</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Criada em</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in rooms %}
+                    <tr>
+                        <td>{{ room.id }}</td>
+                        <td>{{ room.name }}</td>
+                        <td>
+                            <span class="admin-badge {{ 'no' if room.is_private else 'yes' }}">
+                                {{ 'Privada' if room.is_private else 'Pública' }}
+                            </span>
+                        </td>
+                        <td>{{ room.created_at.strftime('%d/%m/%Y %H:%M') if room.created_at else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Storage Report -->
+        <div class="admin-section">
+            <h2 class="admin-section-title">📊 Relatório de Armazenamento</h2>
+            <div class="storage-report-container" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:20px;margin-bottom:20px;">
+                <div class="storage-summary-card" style="background:var(--bg-chat);padding:16px;border-radius:12px;border:1px solid var(--border);">
+                    <h3 style="margin:0 0 12px 0;font-size:1rem;color:var(--text-primary);display:flex;align-items:center;gap:6px;">📦 Total Armazenado</h3>
+                    <div style="font-size:2rem;font-weight:700;color:var(--primary-dark);" id="adminStorageTotal">0.00 MB</div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;" id="adminStorageCount">0 arquivos</div>
+                </div>
+                <div class="storage-breakdown-card" style="background:var(--bg-chat);padding:16px;border-radius:12px;border:1px solid var(--border);">
+                    <h3 style="margin:0 0 12px 0;font-size:1rem;color:var(--text-primary);display:flex;align-items:center;gap:6px;">📈 Divisão por Tipo</h3>
+                    <div id="storageTypeBars" style="display:flex;flex-direction:column;gap:10px;">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Management -->
+        <div class="admin-section">
+            <h2 class="admin-section-title">📁 Gerenciamento de Arquivos</h2>
+            <div id="uploadedFilesContainer" style="overflow-x:auto;">
+                <table class="admin-table" id="adminFilesTable" style="margin-bottom:12px;">
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Nome Original</th>
+                            <th>MIME / Tipo</th>
+                            <th>Tamanho</th>
+                            <th>Enviado Por</th>
+                            <th>Sala</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminFilesList">
+                        <tr>
+                            <td colspan="8" style="text-align:center;color:var(--text-secondary);padding:20px;">Carregando arquivos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="display:flex;justify-content:center;gap:12px;margin-top:16px;align-items:center;" id="filesPagination">
+                    <button class="btn btn-secondary" id="prevFilesBtn" disabled onclick="changeFilesPage(-1)">Anterior</button>
+                    <span id="filesPageText" style="font-size:0.9rem;color:var(--text-secondary);font-weight:600;">Página 1</span>
+                    <button class="btn btn-secondary" id="nextFilesBtn" disabled onclick="changeFilesPage(1)">Próximo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Logs -->
+        <div class="admin-section">
+            <h2 class="admin-section-title">📋 Logs Recentes</h2>
+            <div id="auditLogs" style="max-height:300px;overflow-y:auto;">
+                <p style="text-align:center;color:var(--text-secondary);padding:12px;">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFilesPage = 1;
+        let hasMoreFiles = false;
+
+        // Load audit logs
+        fetch('/api/admin/audit-logs')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var el = document.getElementById('auditLogs');
+                if (!data.logs || data.logs.length === 0) {
+                    el.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:12px;">Nenhum log encontrado</p>';
+                    return;
+                }
+                var html = '<table class="admin-table"><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody>';
+                data.logs.forEach(function(log) {
+                    var date = log.timestamp ? new Date(log.timestamp).toLocaleString('pt-BR') : '-';
+                    html += '<tr>' +
+                        '<td style="white-space:nowrap;font-size:0.78rem;">' + date + '</td>' +
+                        '<td>' + (log.username || '-') + '</td>' +
+                        '<td><code style="background:var(--bg-input);padding:2px 8px;border-radius:4px;font-size:0.78rem;">' + log.action + '</code></td>' +
+                        '<td style="font-size:0.82rem;color:var(--text-secondary);">' + (log.details || '-') + '</td>' +
+                    '</tr>';
+                });
+                html += '</tbody></table>';
+                el.innerHTML = html;
+            });
+
+        function loadStorageStats() {
+            fetch('/api/admin/stats')
+                .then(function(r) { return r.json(); })
+                .then(function(stats) {
+                    document.getElementById('onlineCount').textContent = stats.online_count;
+                    
+                    if (stats.storage) {
+                        document.getElementById('adminStorageTotal').textContent = stats.storage.total_mb.toFixed(2) + ' MB';
+                        document.getElementById('adminStorageCount').textContent = stats.storage.file_count + ' arquivos';
+                        
+                        // Render breakdown
+                        const breakdown = stats.storage.by_type;
+                        const colors = {
+                            image: '#ec4899',
+                            video: '#8b5cf6',
+                            audio: '#10b981',
+                            document: '#f59e0b',
+                            archive: '#3b82f6',
+                            other: '#6b7280'
+                        };
+                        const labels = {
+                            image: 'Imagens',
+                            video: 'Vídeos',
+                            audio: 'Áudio',
+                            document: 'Documentos',
+                            archive: 'Arquivos compactados',
+                            other: 'Outros'
+                        };
+                        
+                        let html = '';
+                        const totalBytes = stats.storage.total_bytes || 1;
+                        
+                        for (let type in breakdown) {
+                            const bytes = breakdown[type].bytes;
+                            const pct = Math.round((bytes / totalBytes) * 100);
+                            const mb = (bytes / (1024 * 1024)).toFixed(1);
+                            
+                            html += `
+                            <div style="margin-bottom:6px;">
+                                <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:2px;">
+                                    <span style="color:var(--text-primary);font-weight:600;">${labels[type] || type}</span>
+                                    <span style="color:var(--text-secondary);">${mb} MB (${pct}%)</span>
+                                </div>
+                                <div style="background:var(--bg-input);border-radius:4px;height:8px;width:100%;overflow:hidden;position:relative;">
+                                    <div style="background:${colors[type] || '#666'};height:100%;width:${pct}%;transition:width 0.3s ease;"></div>
+                                </div>
+                            </div>`;
+                        }
+                        document.getElementById('storageTypeBars').innerHTML = html;
+                    }
+                });
+        }
+
+        function loadUploadedFiles(page) {
+            fetch('/api/admin/files?page=' + page)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    currentFilesPage = page;
+                    hasMoreFiles = data.has_more;
+                    
+                    document.getElementById('filesPageText').textContent = 'Página ' + page;
+                    document.getElementById('prevFilesBtn').disabled = (page === 1);
+                    document.getElementById('nextFilesBtn').disabled = !hasMoreFiles;
+                    
+                    const listEl = document.getElementById('adminFilesList');
+                    if (!data.files || data.files.length === 0) {
+                        listEl.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:20px;">Nenhum arquivo encontrado</td></tr>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    data.files.forEach(function(f) {
+                        const date = f.uploaded_at ? new Date(f.uploaded_at).toLocaleString('pt-BR') : '-';
+                        const size = f.compressed_size ? formatSize(f.compressed_size) : formatSize(f.size_bytes);
+                        
+                        let preview = '📄';
+                        if (f.thumbnail) {
+                            preview = `<img src="${f.thumbnail}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;cursor:pointer;" onclick="window.open('/uploads/${f.stored_name}', '_blank')">`;
+                        } else if (f.mime_type.startsWith('audio/')) {
+                            preview = '🎵';
+                        } else if (f.mime_type.startsWith('video/')) {
+                            preview = '🎥';
+                        } else if (f.mime_type.includes('zip') || f.mime_type.includes('rar') || f.mime_type.includes('compressed')) {
+                            preview = '📦';
+                        }
+                        
+                        html += `
+                        <tr>
+                            <td><div style="display:flex;justify-content:center;align-items:center;min-height:36px;font-size:1.4rem;">${preview}</div></td>
+                            <td style="max-width:180px;word-break:break-all;font-size:0.82rem;font-weight:600;text-align:left;">${f.original_name}</td>
+                            <td><code style="background:var(--bg-input);padding:2px 6px;border-radius:4px;font-size:0.75rem;white-space:nowrap;">${f.mime_type}</code></td>
+                            <td style="font-size:0.82rem;white-space:nowrap;">${size}</td>
+                            <td style="font-size:0.82rem;font-weight:600;">${f.uploaded_by}</td>
+                            <td style="font-size:0.82rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.room_name}</td>
+                            <td style="white-space:nowrap;font-size:0.75rem;">${date}</td>
+                            <td>
+                                <button class="admin-action-link danger" style="background:none;border:none;cursor:pointer;font-family:inherit;font-size:0.82rem;padding:0;" onclick="deleteFile(${f.id})">🗑️ Excluir</button>
+                            </td>
+                        </tr>`;
+                    });
+                    listEl.innerHTML = html;
+                });
+        }
+
+        function deleteFile(fileId) {
+            if (!confirm('Tem certeza que deseja excluir permanentemente este arquivo?')) return;
+            fetch('/api/admin/files/' + fileId, { 
+                method: 'DELETE',
+                headers: { 'X-CSRF-Token': '{{ csrf_token }}' }
+            })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        loadUploadedFiles(currentFilesPage);
+                        loadStorageStats();
+                    } else {
+                        alert('Erro ao excluir arquivo');
+                    }
+                });
+        }
+
+        function changeFilesPage(delta) {
+            const target = currentFilesPage + delta;
+            if (target >= 1) {
+                loadUploadedFiles(target);
+            }
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        // Init
+        loadStorageStats();
+        loadUploadedFiles(1);
+
+        // Auto-refresh stats
+        setInterval(function() {
+            loadStorageStats();
+        }, 30000);
+    </script>
+</body>
+</html>
