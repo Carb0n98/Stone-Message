@@ -30,10 +30,25 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'sua_chave_secreta_dev')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+database_uri = os.environ.get(
     'DATABASE_URI',
     'mysql+pymysql://Nate:Natecrusader25@147.93.67.17:3306/default'
 )
+
+# Test connection, fallback to SQLite if unreachable
+if 'mysql' in database_uri:
+    try:
+        from sqlalchemy import create_engine
+        test_engine = create_engine(database_uri, connect_args={"connect_timeout": 3})
+        conn = test_engine.connect()
+        conn.close()
+        test_engine.dispose()
+        print("Conectado ao banco de dados MySQL com sucesso!")
+    except Exception as e:
+        print(f"Aviso: Não foi possível conectar ao MySQL ({e}). Usando SQLite local para desenvolvimento...")
+        database_uri = 'sqlite:///' + os.path.join(os.path.dirname(__file__), 'dev.db')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024  # 25 MB
 app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', os.path.join(os.path.dirname(__file__), 'uploads'))
